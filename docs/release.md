@@ -13,22 +13,21 @@ The private Node package contains CI tooling and is not separately published.
 
 ## Qualification before tagging
 
-1. Install selected tools and TeX packages from `ops/ci/github-setup.sh` and the
-   pinned workflow, use Node 24, and run `npm ci`.
+1. Install selected tools and TeX packages from `ops/ci/github-setup.sh`, use
+   Node 24, and run `npm ci`.
 2. Run `bash scripts/ci-doctor.sh`, then `just check`. The full gate includes
    tooling tests, TeX build, baseline comparison, strict security, actual proof
    execution and verification, required proofbind, and zero-drop ratchet.
    Resolve every failure.
-3. Review the complete PR diff and actual successful `quality` and
-   `jankurai-paper/required` checks for its exact head. Merge through protection
-   and qualify resulting main and its immutable `ci-<full-sha>` tag.
+3. Review the complete forge PR diff and the actual successful forge CI results
+   for its exact head. Merge through the forge and qualify resulting main.
 4. Retain the PDF, its SHA-256, audit and proof reports, security evidence,
    source commit/tree, and actual tool identities. Verify version agreement and
    this inventory before creating a versioned release tag.
 
-Current `ci.yml` publishes qualification tags and `quality-evidence`; it does
-not publish a versioned release or sign a PDF. Downstream consumers select
-immutable qualified tags.
+GitHub is a publishing mirror only. CI runs on the forge and our own hosts, and
+releases are built and signed on our servers. A separate change introduces
+key-based release signing. Downstream consumers select immutable qualified tags.
 
 ## Build integrity and provenance
 

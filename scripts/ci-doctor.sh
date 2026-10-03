@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# CI doctor checks required tools and Node's major version. Hosted setup selects
-# tools in github-setup.sh and ci.yml; this check is not a provenance receipt.
+# CI doctor checks required tools and Node's major version. CI setup selects
+# tools in github-setup.sh; this check is not a provenance receipt.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/../ops/ci/lib.sh"
 
 log "ci-doctor: checking required tools"
 
 status=0
-for tool in node npm jq gitleaks zizmor actionlint syft grype latexmk pdflatex biber jankurai; do
+for tool in node npm jq gitleaks syft grype latexmk pdflatex biber jankurai; do
   if command -v "$tool" >/dev/null 2>&1; then
     log "ok: $tool ($(command -v "$tool"))"
   else

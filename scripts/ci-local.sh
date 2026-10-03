@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local CI entrypoint. Mirrors the GitHub Actions lanes so a green local run
+# Local CI entrypoint. Mirrors the forge CI lanes so a green local run
 # means a green CI run. Each lane delegates to ops/ci/<lane>.sh.
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."

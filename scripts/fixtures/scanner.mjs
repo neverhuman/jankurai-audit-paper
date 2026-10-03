@@ -8,10 +8,6 @@ appendFileSync('calls.jsonl', JSON.stringify([tool, args]) + '\n');
 if (process.env.FAIL_TOOL === tool) process.exit(23);
 if (tool === 'gitleaks' && !process.env.MISSING_SARIF)
   writeFileSync(args[args.indexOf('--report-path') + 1], '{"version":"2.1.0","runs":[]}');
-if (tool === 'zizmor') {
-  const results = process.env.SARIF_FINDING ? [{ ruleId: 'unsafe-workflow', level: 'warning' }] : [];
-  console.log(JSON.stringify({ version: '2.1.0', runs: [{ results }] }));
-}
 if (tool === 'syft') {
   const path = args[args.indexOf('-o') + 1].split('=')[1];
   const kind = process.env.SBOM_KIND ?? 'valid';

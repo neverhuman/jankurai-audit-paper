@@ -13,11 +13,11 @@ script entrypoints and the mandatory pre-push hook.
 
 ## Forbidden
 
-- Do not put commands in `.github/workflows/ci.yml` that are not also runnable
-  through `ops/ci/<lane>.sh`. CI must stay thin and delegate to these scripts so
-  local and CI behaviour never drift (HLT-042).
-- Do not call `latexmk` or `jankurai` directly from the workflow; always go
-  through a lane script so the pinned flags stay consistent.
+- Do not add GitHub Actions workflows. GitHub is a publishing mirror only; CI
+  runs on the forge and our own hosts and must delegate to `ops/ci/<lane>.sh`
+  so local and CI behaviour never drift (HLT-042).
+- Do not call `latexmk` or `jankurai` directly from CI; always go through a
+  lane script so the pinned flags stay consistent.
 - Do not hand-edit generated output (`target/`, `paper/jankurai.pdf`).
 
 ## Proof lane

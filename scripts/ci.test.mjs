@@ -3,36 +3,13 @@ import { validateBadgeSource } from '../ops/ci/verify-badge-source.mjs';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { cpSync, mkdtempSync, mkdirSync, readFileSync, writeFileSync, chmodSync,
-  rmSync, symlinkSync, existsSync, readdirSync } from 'node:fs';
+  rmSync, symlinkSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { parseUniqueJson } from '../ops/ci/json.mjs';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const aggregate = needs => spawnSync('bash', [join(root, 'ops/ci/aggregate.sh')], {
-  env: { ...process.env, NEEDS_JSON: needs }, encoding: 'utf8' });
-
-test('aggregate accepts exactly the successful quality lane', () => {
-  assert.equal(aggregate('{"quality":{"result":"success","outputs":{}}}').status, 0);
-  const invalid = ['{"quality":{"result":"failure"},"quality":{"result":"success"}}', '{}', '[]', 'null', '42', '"success"', '{',
-    '{"other":{"result":"success"}}', '{"quality":null}', '{"quality":[]}', '{"quality":{}}',
-    '{"quality":{"result":"success"},"extra":{"result":"success"}}',
-    ...['failure', 'cancelled', 'skipped', 'neutral', '', null].map(result => JSON.stringify({ quality: { result } }))];
-  for (const value of invalid) assert.notEqual(aggregate(value).status, 0, value);
-});
-test('removing or renaming the actual workflow dependency cannot pass', () => {
-  const workflow = readFileSync(join(root, '.github/workflows/ci.yml'), 'utf8');
-  assert.match(workflow, /^  quality:$/m);
-  assert.match(workflow, /^    needs: quality$/m);
-  assert.ok(workflow.includes('NEEDS_JSON: ${{ toJSON(needs) }}'));
-  for (const changed of [workflow.replace('    needs: quality\n', ''), workflow.replaceAll('quality', 'renamed')]) {
-    const required = changed.split('  required:\n')[1].split('  publish-ci-tag:')[0];
-    const dependencies = [...required.matchAll(/^    needs: (\w+)$/gm)].map(m => m[1]);
-    const needs = Object.fromEntries(dependencies.map(name => [name, { result: 'success' }]));
-    assert.notEqual(aggregate(JSON.stringify(needs)).status, 0);
-  }
-});
 test('JSON rejects repeated keys at every object depth without confusing strings or arrays', () => {
   assert.deepEqual(parseUniqueJson('{"a":[{"b":1},{"b":2}],"text":"{\\\"a\\\":1}"}'),
     { a: [{ b: 1 }, { b: 2 }], text: '{"a":1}' });
@@ -44,10 +21,8 @@ function fixture(t) {
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
   for (const dir of ['ops', 'tools']) cpSync(join(root, dir), join(cwd, dir), { recursive: true });
   symlinkSync(join(root, 'node_modules'), join(cwd, 'node_modules'));
-  mkdirSync(join(cwd, '.github/workflows'), { recursive: true });
-  writeFileSync(join(cwd, '.github/workflows/ci.yml'), 'name: fixture\n');
   const bin = join(cwd, 'bin'); mkdirSync(bin);
-  for (const name of ['gitleaks', 'zizmor', 'actionlint', 'syft', 'grype', 'cargo', 'npm', 'jankurai']) {
+  for (const name of ['gitleaks', 'syft', 'grype', 'cargo', 'npm', 'jankurai']) {
     const file = join(bin, name);
     cpSync(join(root, 'scripts/fixtures/scanner.mjs'), file); chmodSync(file, 0o755);
   }
@@ -85,12 +60,12 @@ test('a successful TeX process must leave a real PDF before publishing its hash'
 test('success runs each scanner once and publishes a validated inventory', t => {
   const f = fixture(t); const result = f.run();
   assert.equal(result.status, 0, result.stdout + result.stderr);
-  assert.deepEqual(f.calls().map(c => c[0]), ['gitleaks', 'zizmor', 'actionlint', 'syft', 'grype']);
-  assert.equal(steps(result).length, 6);
+  assert.deepEqual(f.calls().map(c => c[0]), ['gitleaks', 'syft', 'grype']);
+  assert.equal(steps(result).length, 4);
   assert.ok(steps(result).every(s => s.exit_code === 0 && s.advisory === false));
   assert.equal(JSON.parse(readFileSync(join(f.cwd, 'target/jankurai/security/sbom.json'))).bomFormat, 'CycloneDX');
 });
-for (const tool of ['gitleaks', 'zizmor', 'actionlint', 'syft', 'grype']) {
+for (const tool of ['gitleaks', 'syft', 'grype']) {
   test(`${tool} failure blocks and preserves its actual outcome`, t => {
     const f = fixture(t); const result = f.run({ FAIL_TOOL: tool });
     assert.equal(result.status, 23, result.stdout + result.stderr);
@@ -109,12 +84,6 @@ test('missing Syft blocks without finding another system copy', t => {
   }
   const result = f.run({ PATH: f.bin });
   assert.equal(result.status, 127, result.stdout + result.stderr);
-});
-test('zero-exit SARIF findings block and remain available for inspection', t => {
-  const f = fixture(t); const result = f.run({ SARIF_FINDING: '1' });
-  assert.notEqual(result.status, 0);
-  assert.ok(!f.calls().some(c => c[0] === 'syft'));
-  assert.ok(readdirSync(join(f.cwd, 'target/jankurai/security')).some(p => p.startsWith('run.')));
 });
 for (const kind of ['missing', 'text', 'schema', 'stale', 'mtime', 'producer', 'inventory', 'format', 'timestamp', 'duplicate', 'symlink', 'email', 'iri']) {
   test(`${kind} SBOM blocks before Grype and cannot reuse the previous inventory`, t => {

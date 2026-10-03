@@ -7,14 +7,13 @@ security, proof, and ratchet checks to pass.
 ## CI tooling and security evidence
 
 Use Node 24 and run `npm ci` before the local proof lanes. The lockfile pins
-AJV and its format validators; `npm test` runs the aggregate, scanner-failure,
+AJV and its format validators; `npm test` runs the scanner-failure,
 and stale/invalid-artifact tests with temporary controlled subprocesses.
-The controlled subprocesses test the lane; hosted CI also runs the real tools.
+The controlled subprocesses test the lane; the forge CI also runs the real tools.
 
 `bash scripts/ci-local.sh security` and `just security` run one strict scanner
-entrypoint. Gitleaks, zizmor, actionlint, Syft, CycloneDX validation, and Grype
-are required. Cargo audit/deny and npm audit also block when their manifest is
-present. Zizmor SARIF findings block even when the process exits successfully.
+entrypoint. Gitleaks, Syft, CycloneDX validation, and Grype are required. Cargo
+audit/deny and npm audit also block when their manifest is present.
 Each scan uses a new `target/jankurai/security/run.*` directory. Missing,
 invalid, stale, or symlinked SBOMs fail before Grype; there is no hash-list
 fallback. CycloneDX 1.6 is checked against the unchanged vendored upstream
@@ -93,16 +92,13 @@ truth; prefer it over ad hoc log spam under `target/jankurai/`.
 The quality job builds the auditor and paper and runs network-backed scanners. Explicit
 budgets, quotas, and stop conditions bound every lane:
 
-- **Budget / quota**: each job declares a hard `timeout-minutes` in
-  [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) (quality 90 minutes; aggregate and tag publication 5 minutes each). A run that exceeds its quota is killed by the
-  runner.
+- **Budget / quota**: the quality run is budgeted at 90 minutes. A run that
+  exceeds its quota is stopped.
 - **Stop condition**: every lane script runs under `set -euo pipefail` and
   `latexmk` uses `-halt-on-error`, so the build stops on the first error rather
   than burning minutes retrying.
-- **Kill switch**: cancel an in-flight run via the `concurrency` group in
-  `ci.yml` (`cancel-in-progress: true`); a new push cancels the superseded run.
-  Locally, the pre-push gate (`ops/git-hooks/pre-push`) blocks before any CI
-  spend.
+- **Kill switch**: cancel an in-flight forge CI run. Locally, the pre-push gate
+  (`ops/git-hooks/pre-push`) blocks before any CI spend.
 - **No paid surface**: network access installs pinned tools and dependencies and retrieves
   security advisory databases; no paid APIs run, so the per-run cost is bounded to the CI minutes
   for the complete quality job.
@@ -111,14 +107,11 @@ budgets, quotas, and stop conditions bound every lane:
 
 The fast lane is incremental: `latexmk` reuses its `paper/jankurai.fdb_latexmk`
 and `paper/jankurai.fls` dependency database to rebuild only changed sections,
-locally. Hosted CI starts from its checked-out sources and installs the TeX
-packages through `ops/ci/github-setup.sh`; the workflow currently has no TeX
-cache step. The mapped proof command can target the paper build, while the
+locally. CI installs the TeX packages through `ops/ci/github-setup.sh`. The mapped proof command can target the paper build, while the
 protected quality job still runs the full gate.
 
 ## CI
 
-[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs `quality` on
-main pushes and pull requests. `jankurai-paper/required` accepts only that
-exact successful lane. Both checks are required on protected main and bound to
-the GitHub Actions app. All third-party actions are pinned to full commit SHAs.
+GitHub is a publishing mirror only and runs no CI. CI runs on the forge and our
+own hosts through the `ops/ci/*.sh` lanes, and `main` moves only through
+reviewed forge pull requests.

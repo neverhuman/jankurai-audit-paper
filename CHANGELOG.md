@@ -7,6 +7,14 @@ The authoritative version string lives in [`VERSION`](VERSION).
 
 ## [Unreleased]
 
+### Removed
+
+- GitHub Actions workflows, the GitHub-only job aggregator
+  (`ops/ci/aggregate.sh`) and its tests, and the zizmor/actionlint workflow
+  scans (dropped from `agent/security-policy.toml`). GitHub is a publishing
+  mirror only; CI runs on the forge and our own hosts, and releases are built
+  and signed on our servers.
+
 ### Added
 
 - Root `Justfile` command surface with `setup`, `fast`, `check`, `verify`, and

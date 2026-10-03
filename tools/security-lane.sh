@@ -6,7 +6,7 @@ mkdir -p target/jankurai/security
 run_dir="$(mktemp -d target/jankurai/security/run.XXXXXX)"
 started="$(date +%s)"
 # Prior runs remain in run.*; stable names must never stand in for new output.
-rm -f target/jankurai/security/{gitleaks.sarif,zizmor.sarif,sbom.json}
+rm -f target/jankurai/security/{gitleaks.sarif,sbom.json}
 scan() {
   local tool="$1"; shift
   local status=ran result=0
@@ -16,17 +16,8 @@ scan() {
     | sed 's/^/jankurai-security-step=/'
   return "$result"
 }
-zizmor_scan() {
-  zizmor --no-progress --format sarif .github/workflows > "$run_dir/zizmor.sarif" || return
-  # SARIF mode exits zero for findings: require complete, empty result sets too.
-  jq -e '.version == "2.1.0" and (.runs | type == "array" and length > 0) and
-    all(.runs[]; (.results | type == "array" and length == 0) and
-      all(.invocations[]?; .executionSuccessful != false))' "$run_dir/zizmor.sarif" > /dev/null
-}
 scan gitleaks gitleaks detect --source . --no-banner --redact \
   --report-format sarif --report-path "$run_dir/gitleaks.sarif"
-scan zizmor zizmor_scan
-scan actionlint actionlint .github/workflows/*.yml
 if [[ -f Cargo.toml ]]; then
   scan cargo-audit cargo audit
   scan cargo-deny cargo deny check advisories bans sources
@@ -39,7 +30,7 @@ scan syft syft scan dir:. --exclude './target/**' --exclude './.git/**' --exclud
   -o "cyclonedx-json=$run_dir/sbom.json"
 scan sbom-validation node ops/ci/validate-sbom.mjs "$run_dir/sbom.json" "$started"
 scan grype grype "sbom:$run_dir/sbom.json" --fail-on high
-for artifact in gitleaks.sarif zizmor.sarif sbom.json; do
+for artifact in gitleaks.sarif sbom.json; do
   [[ -s "$run_dir/$artifact" && ! -L "$run_dir/$artifact" ]]
   cp "$run_dir/$artifact" "target/jankurai/security/$artifact"
 done

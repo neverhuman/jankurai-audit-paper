@@ -71,7 +71,7 @@
     },
     ".github/": {
       "command": "bash scripts/ci-local.sh required",
-      "purpose": "verify CI workflow entrypoints stay pinned and thin"
+      "purpose": "verify code-owner routing stays aligned with the owner map"
     },
     "ops/": {
       "command": "bash scripts/ci-local.sh required",

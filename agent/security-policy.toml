@@ -1,25 +1,26 @@
 schema_version = "1.0.0"
 
 # Every applicable scanner blocks. Dependency scanners run when their manifest
-# is present; workflows and the SBOM are required even for documentation repos.
-enabled_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
-required_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "sbom-validation"]
+# is present; the secret scan and the SBOM are required even for documentation
+# repos. There are no GitHub workflows to lint: GitHub is a publishing mirror.
+enabled_tools = ["gitleaks", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
+required_tools = ["gitleaks", "syft", "grype", "sbom-validation"]
 advisory_tools = []
 
 [severity_thresholds]
 fail_lane_on = "high"
 
 [profiles.local]
-enabled_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
-required_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "sbom-validation"]
+enabled_tools = ["gitleaks", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
+required_tools = ["gitleaks", "syft", "grype", "sbom-validation"]
 advisory_tools = []
 
 [profiles.ci]
-enabled_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
-required_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "sbom-validation"]
+enabled_tools = ["gitleaks", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
+required_tools = ["gitleaks", "syft", "grype", "sbom-validation"]
 advisory_tools = []
 
 [profiles.release]
-enabled_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
-required_tools = ["gitleaks", "zizmor", "actionlint", "syft", "grype", "sbom-validation"]
+enabled_tools = ["gitleaks", "syft", "grype", "cargo-audit", "cargo-deny", "npm", "sbom-validation"]
+required_tools = ["gitleaks", "syft", "grype", "sbom-validation"]
 advisory_tools = []
