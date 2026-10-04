@@ -5,6 +5,9 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO_ROOT"
 
+log "required lane: ci-local lane contract"
+bash scripts/ci-local-lanes-test.sh
+
 log "required lane: CI rejection and artifact freshness tests"
 npm test
 
