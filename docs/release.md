@@ -4,11 +4,14 @@ GitHub is authoritative for `neverhuman/jankurai-paper`; `.jeryu/` records
 historical integration metadata. Release tags use
 `jankurai-paper-v<MAJOR.MINOR.PATCH>-split.<N>` from [SPLIT.md](../SPLIT.md).
 
-## Version and changelog
+## Version and release notes
 
 [`VERSION`](../VERSION), `agent/standard-version.toml`, and the proposed tag
-must agree. Record actual changes in [CHANGELOG.md](../CHANGELOG.md), then
-promote `Unreleased` to a dated version section in the reviewed release commit.
+must agree. Changes are not recorded by hand: cutting the release generates the
+notes from the commits since the previous release, using their subjects and
+`Todo:` trailers. Write those generated notes into
+[CHANGELOG.md](../CHANGELOG.md) under `Unreleased`, then promote `Unreleased` to
+a dated version section in the reviewed release commit.
 The private Node package contains CI tooling and is not separately published.
 
 ## Qualification before tagging
