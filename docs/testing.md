@@ -6,7 +6,11 @@ security, proof, and ratchet checks to pass.
 
 ## CI tooling and security evidence
 
-Use Node 24 and run `npm ci` before the local proof lanes. The lockfile pins
+Use Node 24 and run `npm ci --include=dev --ignore-scripts --no-audit --no-fund`
+before the local proof lanes. The hosted `pr-ci` wrapper performs this locked
+setup and therefore needs registry access on a cold cache; the `required`
+proof can run offline after setup. Lifecycle scripts are intentionally disabled
+for these CI tooling dependencies. The lockfile pins
 AJV and its format validators; `npm test` runs the scanner-failure,
 and stale/invalid-artifact tests with temporary controlled subprocesses.
 The controlled subprocesses test the lane; the forge CI also runs the real tools.
@@ -35,6 +39,7 @@ through the root [`Justfile`](../Justfile), through
 
 | Lane | Command | Proves |
 | --- | --- | --- |
+| `pr-ci` | `bash ops/ci/pr-ci.sh` | Locked Node setup, then the required proof; the forge runs this command |
 | `required` | `bash ops/ci/required.sh` | CI rejection tests pass and the paper PDF compiles |
 | `fast` | `bash ops/ci/fast.sh` | the paper builds, then the jankurai self-audit passes |
 | `audit` | `bash ops/ci/audit.sh` | writes `.jankurai/repo-score.{json,md}` and asserts they exist |

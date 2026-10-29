@@ -12,6 +12,10 @@ setup:
     npm ci
     latexmk -version
 
+# Hosted locked dependency setup followed by the offline required proof.
+pr-ci:
+    bash ops/ci/pr-ci.sh
+
 # Alias for setup so `just install` and `just bootstrap` also resolve.
 install: setup
 

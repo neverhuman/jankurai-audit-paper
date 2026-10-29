@@ -36,6 +36,34 @@ function fixture(t) {
 const steps = result => result.stdout.split('\n').filter(s => s.startsWith('jankurai-security-step='))
   .map(s => JSON.parse(s.slice('jankurai-security-step='.length)));
 
+test('declared hosted required command reaches the real proof and propagates failures', t => {
+  const f = fixture(t);
+  const declaration = readFileSync(join(root, '.jeryu/ci.toml'), 'utf8');
+  const required = declaration.split('[[lane]]').find(section => /^name = "required"$/m.test(section));
+  assert.ok(required, 'forge must declare its required lane');
+  const command = required.match(/^command = "([^"]+)"$/m)?.[1];
+  assert.equal(command, 'bash ops/ci/pr-ci.sh');
+  writeFileSync(join(f.bin, 'npm'), `#!/usr/bin/env bash
+set -eu
+printf '%s\\n' "$1" >> npm-calls
+if [[ "$1" == ci && "\${FAIL_SETUP:-}" == 1 ]]; then exit 29; fi
+if [[ "$1" == test && "\${FAIL_REQUIRED:-}" == 1 ]]; then exit 37; fi
+`, { mode: 0o755 });
+  writeFileSync(join(f.bin, 'latexmk'), `#!/usr/bin/env bash
+set -eu
+mkdir -p target/paper
+printf '%%PDF-fixture' > target/paper/jankurai.pdf
+`, { mode: 0o755 });
+  const run = extra => spawnSync('bash', ['-c', command], {
+    cwd: f.cwd, env: { ...f.env, ...extra }, encoding: 'utf8' });
+  const success = run({});
+  assert.equal(success.status, 0, success.stdout + success.stderr);
+  assert.equal(readFileSync(join(f.cwd, 'npm-calls'), 'utf8'), 'ci\ntest\n');
+  assert.ok(existsSync(join(f.cwd, 'target/jankurai/paper-build.sha256')));
+  assert.equal(run({ FAIL_SETUP: '1' }).status, 29);
+  assert.equal(run({ FAIL_REQUIRED: '1' }).status, 37);
+});
+
 test('a successful TeX process must leave a real PDF before publishing its hash', t => {
   const f = fixture(t);
   writeFileSync(join(f.bin, 'latexmk'), '#!/usr/bin/env bash\nexit 0\n', { mode: 0o755 });
