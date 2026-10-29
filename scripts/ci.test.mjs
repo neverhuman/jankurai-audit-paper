@@ -40,7 +40,9 @@ test('a successful TeX process must leave a real PDF before publishing its hash'
   const f = fixture(t);
   writeFileSync(join(f.bin, 'latexmk'), '#!/usr/bin/env bash\nexit 0\n', { mode: 0o755 });
   mkdirSync(join(f.cwd, 'paper'));
-  const pdf = join(f.cwd, 'paper/jankurai.pdf');
+  const published = join(f.cwd, 'paper/jankurai.pdf');
+  writeFileSync(published, '%PDF-published-source');
+  const pdf = join(f.cwd, 'target/paper/jankurai.pdf');
   const output = join(f.cwd, 'target/jankurai/paper-build.sha256');
   const run = () => f.run({}, 'ops/ci/required.sh');
   assert.notEqual(run().status, 0);
@@ -55,7 +57,8 @@ test('a successful TeX process must leave a real PDF before publishing its hash'
   rmSync(pdf); writeFileSync(pdf, '%PDF-fixture');
   const result = run(); assert.equal(result.status, 0, result.stderr);
   assert.equal(readFileSync(output, 'utf8'),
-    `${createHash('sha256').update('%PDF-fixture').digest('hex')}  paper/jankurai.pdf\n`);
+    `${createHash('sha256').update('%PDF-fixture').digest('hex')}  target/paper/jankurai.pdf\n`);
+  assert.equal(readFileSync(published, 'utf8'), '%PDF-published-source');
 });
 
 test('success runs each scanner once and publishes a validated inventory', t => {

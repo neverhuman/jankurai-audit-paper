@@ -45,10 +45,12 @@ The narrowest proof loop for agent iteration is `just fast`.
 
 The build runs `latexmk` non-interactively
 (`-interaction=nonstopmode -halt-on-error`) and all output is routed to the
-`paper/` out-dir. The bibliography and generated tables are derived from
+`target/paper/` out-dir. The bibliography and generated tables are derived from
 committed data sources under `paper/data/`. The required lane checks for a
 nonempty regular PDF and records its SHA-256 in
-`target/jankurai/paper-build.sha256`. CI uploads both with `quality-evidence`.
+`target/jankurai/paper-build.sha256`. The compiled PDF and TeX build logs live in
+`target/paper/`; required CI leaves the tracked published PDF and its source
+logs untouched. The checksum identifies the generated PDF.
 Bit-for-bit reproducibility also needs a fixed TeX installation, fonts, and
 timestamp configuration; a successful compilation alone does not establish it.
 
