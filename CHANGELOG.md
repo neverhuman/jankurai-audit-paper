@@ -7,6 +7,14 @@ The authoritative version string lives in [`VERSION`](VERSION).
 
 ## [Unreleased]
 
+### Changed
+
+- Prepare `agent/standard-version.toml` for the family auditor 1.7.6 composition.
+  This is source preparation; the family release and signed artifacts are not
+  published by this member change.
+- Build the paper and its SHA-256 evidence from the merged isolated artifact
+  entrypoint in `target/paper`, without rewriting tracked source inputs.
+
 ## [1.7.5] - 2026-10-14
 
 ### Changed
