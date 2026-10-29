@@ -1,9 +1,17 @@
 #!/usr/bin/env node
 // Controlled subprocess fixture, installed only in temporary test directories.
-import { appendFileSync, writeFileSync, symlinkSync, utimesSync } from 'node:fs';
+import { appendFileSync, readFileSync, writeFileSync, symlinkSync, utimesSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 const tool = basename(process.argv[1]);
 const args = process.argv.slice(2);
+// Identity probes answer with the pinned version so the lanes that refuse an
+// ambient auditor accept this stub, and they stay out of the call log.
+if (tool === 'jankurai' && args[0] === '--version') {
+  const pin = readFileSync('agent/standard-version.toml', 'utf8')
+    .match(/^auditor_version = "([^"]*)"$/m)[1];
+  process.stdout.write(`jankurai ${pin}\n`);
+  process.exit(0);
+}
 appendFileSync('calls.jsonl', JSON.stringify([tool, args]) + '\n');
 if (process.env.FAIL_TOOL === tool) process.exit(23);
 if (tool === 'gitleaks' && !process.env.MISSING_SARIF)
