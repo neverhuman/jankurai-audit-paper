@@ -7,3 +7,13 @@ node_modules/
 test-results/
 .fusion/
 .jankurai/
+
+# Generated paper build outputs (canonical output is target/paper/).
+/paper/jankurai.aux
+/paper/jankurai.bbl
+/paper/jankurai.blg
+/paper/jankurai.fdb_latexmk
+/paper/jankurai.fls
+/paper/jankurai.log
+/paper/jankurai.out
+/paper/jankurai.pdf

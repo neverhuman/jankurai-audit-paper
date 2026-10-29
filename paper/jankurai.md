@@ -14,7 +14,7 @@ Schema version: `1.8.0`
 
 Canonical source: `paper/jankurai.tex` plus `paper/tex/`
 
-Rendered artifact: `paper/jankurai.pdf`
+Rendered artifact: `target/paper/jankurai.pdf`
 
 This Markdown file is an agent companion, not the canonical source. TeX remains the source of truth for the paper.
 
@@ -166,7 +166,7 @@ The current seed suite under `conformance/` has 10 fixture directories, 12 histo
 ```bash
 just versions
 just conformance
-just paper
+just build
 just check
 ```
 
@@ -179,5 +179,5 @@ cargo run -p jankurai -- . --json agent/repo-score.json --md agent/repo-score.md
 The paper lane is:
 
 ```bash
-latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=paper paper/jankurai.tex
+bash ops/ci/build-paper.sh
 ```

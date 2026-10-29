@@ -2,7 +2,7 @@
   "workspace": "jankurai-paper",
   "tests": {
     "paper/": {
-      "command": "latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=paper paper/jankurai.tex",
+      "command": "bash ops/ci/build-paper.sh",
       "purpose": "build the canonical TeX manuscript and prove the paper compiles"
     },
     "assets/": {

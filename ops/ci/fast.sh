@@ -9,7 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO_ROOT"
 
 log "fast lane: latexmk paper build (incremental)"
-latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=paper paper/jankurai.tex
+bash ops/ci/build-paper.sh
 
 mkdir -p target/jankurai
 log "fast lane: changed-fast target-only self-audit"

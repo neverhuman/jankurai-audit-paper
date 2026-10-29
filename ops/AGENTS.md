@@ -18,7 +18,7 @@ script entrypoints and the mandatory pre-push hook.
   so local and CI behaviour never drift (HLT-042).
 - Do not call `latexmk` or `jankurai` directly from CI; always go through a
   lane script so the pinned flags stay consistent.
-- Do not hand-edit generated output (`target/`, `paper/jankurai.pdf`).
+- Do not hand-edit generated output (`target/`, `target/paper/jankurai.pdf`).
 
 ## Proof lane
 

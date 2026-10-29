@@ -29,8 +29,8 @@ Canonical release source is `paper/jankurai.tex` and the TeX files under
 ## Build
 
 ```bash
-just paper
+just build
 ```
 
-The generated PDF is `paper/jankurai.pdf`; it is generator output and should not
+The generated PDF is `target/paper/jankurai.pdf`; it is generator output and should not
 be hand-edited.

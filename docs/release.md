@@ -31,10 +31,15 @@ key-based release signing. Downstream consumers select immutable qualified tags.
 
 ## Build integrity and provenance
 
-`latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=paper paper/jankurai.tex`
+`just build` (the shared `ops/ci/build-paper.sh` entrypoint)
 builds from committed TeX and data. The required lane verifies a nonempty regular
-`paper/jankurai.pdf` and records `target/jankurai/paper-build.sha256`. CI uploads
-both. Bind the distributed PDF to that exact hash and selected source revision.
+`target/paper/jankurai.pdf` and records `target/jankurai/paper-build.sha256`.
+The PDF and TeX byproducts are generated outputs, not tracked source. Retain and
+publish this exact PDF together with its checksum and selected source revision;
+the required gate builds and verifies them but does not publish a release.
+Run `sha256sum --check target/jankurai/paper-build.sha256` from the repository
+root before copying the artifacts into the release inventory. Bind the
+distributed PDF to that exact hash.
 Bit-for-bit rebuilding additionally requires fixed TeX packages, fonts, and
 timestamps; a successful build alone does not establish it.
 

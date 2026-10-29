@@ -54,8 +54,8 @@ The build runs `latexmk` non-interactively
 committed data sources under `paper/data/`. The required lane checks for a
 nonempty regular PDF and records its SHA-256 in
 `target/jankurai/paper-build.sha256`. The compiled PDF and TeX build logs live in
-`target/paper/`; required CI leaves the tracked published PDF and its source
-logs untouched. The checksum identifies the generated PDF.
+`target/paper/`; all build entrypoints use `ops/ci/build-paper.sh`. Generated
+PDFs and TeX byproducts are untracked; builds leave tracked inputs untouched. The checksum identifies the generated PDF.
 Bit-for-bit reproducibility also needs a fixed TeX installation, fonts, and
 timestamp configuration; a successful compilation alone does not establish it.
 
@@ -82,7 +82,7 @@ these fields so the next rerun stays local:
 - `purpose` — what the lane was proving (e.g. "the paper PDF compiles").
 - `reason` — why it failed (the failing command and its exit code).
 - `common fixes` — the usual remedies (missing TeX package, a `\input` typo, a
-  stale `paper/jankurai.fdb_latexmk` cache to delete).
+  stale `target/paper/jankurai.fdb_latexmk` cache to delete).
 - `docs_url` — the local doc that explains the lane: this file,
   [`docs/release.md`](release.md), or [`docs/exceptions.md`](exceptions.md).
 - `repair_hint` — the exact rerun command, e.g. `just fast` or
@@ -112,8 +112,8 @@ budgets, quotas, and stop conditions bound every lane:
 
 ## Build acceleration
 
-The fast lane is incremental: `latexmk` reuses its `paper/jankurai.fdb_latexmk`
-and `paper/jankurai.fls` dependency database to rebuild only changed sections,
+The fast lane is incremental: `latexmk` reuses its `target/paper/jankurai.fdb_latexmk`
+and `target/paper/jankurai.fls` dependency database to rebuild only changed sections,
 locally. CI installs the TeX packages through `ops/ci/github-setup.sh`. The mapped proof command can target the paper build, while the
 protected quality job still runs the full gate.
 
@@ -122,3 +122,7 @@ protected quality job still runs the full gate.
 GitHub is a publishing mirror only and runs no CI. CI runs on the forge and our
 own hosts through the `ops/ci/*.sh` lanes, and `main` moves only through
 reviewed forge pull requests.
+
+The Node command-routing tests use stubbed tools to check output paths and failure
+propagation. They do not prove TeX compilation; the required lane separately runs
+the real installed `latexmk` and validates its generated PDF and checksum.

@@ -50,7 +50,7 @@ security:
 
 # Build the paper PDF from the canonical TeX source.
 build:
-    latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=paper paper/jankurai.tex
+    bash ops/ci/build-paper.sh
 
 # Run the paper build as the test lane (a clean build is the test).
 test:
