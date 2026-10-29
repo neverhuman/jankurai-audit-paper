@@ -69,3 +69,28 @@ If a release regresses, point consumers at the previous qualified immutable tag
 and retained PDF. Preserve existing tags, assets, and failure evidence. Any
 revert or correction goes through a new PR and full qualification before a new
 release; rebuilding an old source tag must not silently replace its original PDF.
+
+## Generate the release notes
+
+The release preparer runs this command before creating the release PR. Set
+`PREVIOUS_RELEASE_TAG` to the last published release tag; `VERSION` must already
+name the candidate version:
+
+```sh
+: "${PREVIOUS_RELEASE_TAG:?set the previous published release tag}"
+git rev-parse --verify "refs/tags/$PREVIOUS_RELEASE_TAG^{commit}"
+git merge-base --is-ancestor "$PREVIOUS_RELEASE_TAG" HEAD
+version=$(cat VERSION)
+mkdir -p target/release-notes
+{
+  printf '## %s\n\n' "$version"
+  git log --reverse --no-merges --format='- %s%n%(trailers:key=Todo)' "$PREVIOUS_RELEASE_TAG..HEAD"
+} > "target/release-notes/$version.md"
+```
+
+Review that generated file for compatibility changes and rollback commits, then
+insert the version block into `CHANGELOG.md` in the release PR. Preserve all
+historical entries and carry existing pending `Unreleased` notes into the
+release they describe. The command above performs generation; publication does
+not invoke an implicit generator. Record rollback details in the revert commit
+so the same command includes them in the next release.
