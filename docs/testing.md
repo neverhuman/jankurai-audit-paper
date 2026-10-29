@@ -46,6 +46,22 @@ through the root [`Justfile`](../Justfile), through
 
 The narrowest proof loop for agent iteration is `just fast`.
 
+## TeX subprocesses
+
+`.latexmkrc` passes `-no-shell-escape` to `pdflatex`, `lualatex` and `xelatex`,
+so TeX source cannot run commands (`\write18`, piped `\input`) during a build.
+The manuscript needs no subprocess: its packages (`array`, `booktabs`, `cite`,
+`colortbl`, `enumitem`, `fancyhdr`, `graphicx`, `hyperref`, `listings`,
+`longtable`, `microtype`, `placeins`, `tabularx`, `tikz`, `twemojis`, `xcolor`,
+`xurl`) work without one, and `paper/figures/stack-ranking.eps` is not included
+by any TeX file. Only `bibtex`/`biber`-style helpers run, and those are started
+by `latexmk` itself, not by TeX. A package that needs `minted`, `svg`,
+`pythontex` or similar must not be added without a reviewed, narrower
+allow-list. `scripts/tex-shell-escape-test.sh` (run by the required lane) builds
+a hostile document with each engine and fails if a command ran; the real
+manuscript build in `ops/ci/build-paper.sh` proves the paper compiles without
+shell escape.
+
 ## Build inputs and output
 
 The build runs `latexmk` non-interactively

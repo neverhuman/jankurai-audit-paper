@@ -23,6 +23,7 @@ function fixture(t) {
   for (const dir of ['ops', 'tools', 'scripts']) cpSync(join(root, dir), join(cwd, dir), { recursive: true });
   mkdirSync(join(cwd, 'agent'));
   cpSync(join(root, 'agent/standard-version.toml'), join(cwd, 'agent/standard-version.toml'));
+  cpSync(join(root, '.latexmkrc'), join(cwd, '.latexmkrc'));
   symlinkSync(join(root, 'node_modules'), join(cwd, 'node_modules'));
   const bin = join(cwd, 'bin'); mkdirSync(bin);
   for (const name of ['gitleaks', 'syft', 'grype', 'cargo', 'npm', 'jankurai']) {

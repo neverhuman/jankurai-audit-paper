@@ -14,4 +14,7 @@ bash scripts/ci-local-lanes-test.sh
 log "required lane: CI rejection and artifact freshness tests"
 npm test
 
+log "required lane: TeX shell escape is refused"
+bash scripts/tex-shell-escape-test.sh
+
 bash ops/ci/build-paper.sh
