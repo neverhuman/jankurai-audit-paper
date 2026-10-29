@@ -21,6 +21,8 @@ function fixture(t) {
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
   // scripts/ too: the required lane probes the ci-local lane contract from there.
   for (const dir of ['ops', 'tools', 'scripts']) cpSync(join(root, dir), join(cwd, dir), { recursive: true });
+  mkdirSync(join(cwd, 'agent'));
+  cpSync(join(root, 'agent/standard-version.toml'), join(cwd, 'agent/standard-version.toml'));
   symlinkSync(join(root, 'node_modules'), join(cwd, 'node_modules'));
   const bin = join(cwd, 'bin'); mkdirSync(bin);
   for (const name of ['gitleaks', 'syft', 'grype', 'cargo', 'npm', 'jankurai']) {
